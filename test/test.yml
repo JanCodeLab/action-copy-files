@@ -25,7 +25,7 @@ jobs:
           source-folder: ./test/source
           contents: '**/*.txt'
           target-folder: ./test/target
-          clean-target-folder: true
+          clear-target-folder: true
           overwrite: true
 
       # Test file exists in target folder

@@ -6,7 +6,7 @@ inputs:
   source-folder:
     description: 'Source folder'
     required: false
-    default: '*'
+    default: '.'
   contents:
     description: 'Patterns to match files'
     required: true
@@ -15,8 +15,8 @@ inputs:
     description: 'Target folder'
     required: true
     default: '.'
-  clean-target-folder:
-    description: 'Clean target folder before copying'
+  clear-target-folder:
+    description: 'Clear target folder before copying'
     required: false
     default: 'false'
   overwrite:
