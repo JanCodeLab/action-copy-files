@@ -1,0 +1,8 @@
+# Dependencies
+node_modules/
+package-lock.json
+
+# Keep the dist directory for GitHub Actions
+!dist/
+
+**/.DS_Store
