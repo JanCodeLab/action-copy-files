@@ -38,20 +38,21 @@ async function run() {
     let hasError = false;
     await Promise.all(files.map(async file => {
         const relativePath = path.relative(sourceFolder, file);
-        const targetPath = path.resolve(path.join(targetFolder, relativePath));
-        
+        const targetPath = path.join(targetFolder, relativePath);
+        core.info(`📄 Copying ${file} to ${targetPath}`);
         try {
+          core.info(`Ensuring target path exists`);
           // Ensure target subdirectory exists
           await fs.mkdir(path.dirname(targetPath), { recursive: true });
-          
+          core.info(`Checking target file exists`);
           if ((await fileExists(targetPath)) && !overwrite) {
             core.warning(`⚠️ File ${targetPath} already exists and will not be overwritten.`);
             return;
           }
-
+          core.info(`Starting copy`);
           await fs.copyFile(file, targetPath);
 
-          core.info(`✅ Copied ${file} to ${targetPath}`);
+          core.info(`✅ Copied`);
         } catch (err) {
           core.error(`❌ Error copying ${file} to ${targetPath}`);
           hasError = hasError || true;
