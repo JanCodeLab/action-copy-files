@@ -30958,34 +30958,77 @@ const fs = (__nccwpck_require__(9896).promises);
 const path = __nccwpck_require__(6928);
 const glob = __nccwpck_require__(7415);
 
+async function fileExists(filePath) {
+  try {
+      await fs.access(filePath);
+      return true;
+  } catch {
+      return false;
+  }
+}
+
+async function isDirectory(filePath) {
+  try {
+    const stats = await fs.stat(filePath);
+    return stats.isDirectory();
+  } catch {
+    return false;
+  }
+}
+
 async function run() {
   try {
-    const sourceFolder = core.getInput('source-folder');
+    let sourceFolder = core.getInput('source-folder');
     const contents = core.getInput('contents');
-    const targetFolder = core.getInput('target-folder');
-    const cleanTargetFolder = core.getBooleanInput('clean-target-folder');
+    let targetFolder = core.getInput('target-folder');
+    const clearTargetFolder = core.getBooleanInput('clear-target-folder');
     const overwrite = core.getBooleanInput('overwrite');
 
-    //create target folder only if it does not exist
-    if (!await fs.stat(targetFolder).catch(() => false)) {
-      await fs.mkdir(targetFolder, { recursive: true });
-    }
+    // Normalize paths to avoid issues with drive letters (Windows)
+    sourceFolder = path.resolve(sourceFolder);
+    targetFolder = path.resolve(targetFolder);
 
-    if (cleanTargetFolder) {
-      await fs.rmdir(targetFolder, { recursive: true });
-      await fs.mkdir(targetFolder, { recursive: true });
+    // Clear target folder if required
+    if (clearTargetFolder) {
+      await fs.rm(targetFolder, { recursive: true, force: true });
     }
-
-    const files = glob.sync(path.join(sourceFolder, contents));
-    for (const file of files) {
-      const targetPath = path.join(targetFolder, path.relative(sourceFolder, file));
-      if (!overwrite && await fs.stat(targetPath).catch(() => false)) {
-        core.warning(`⚠️ File ${targetPath} already exists and will not be overwritten.`);
-        continue;
+    
+    // Ensure target folder exists
+    await fs.mkdir(targetFolder, { recursive: true });
+    
+    // Find files matching the pattern
+    let globResults = glob.sync(contents, { cwd: sourceFolder, absolute: true });
+    
+    // Filter out directories (Windows issue)
+    let files = [];
+    for (const result of globResults) {
+      if (!(await isDirectory(result))) {
+        files.push(result);
       }
-      await fs.mkdir(path.dirname(targetPath), { recursive: true });
-      await fs.copyFile(file, targetPath);
-      core.info(`✅ Copied ${file} to ${targetPath}`);
+    }
+    
+    let hasError = false;
+    await Promise.all(files.map(async file => {
+        const relativePath = path.relative(sourceFolder, file);
+        const targetPath = path.join(targetFolder, relativePath);
+        try {
+          // Ensure target subdirectory exists
+          await fs.mkdir(path.dirname(targetPath), { recursive: true });
+          if ((await fileExists(targetPath)) && !overwrite) {
+            core.warning(`⚠️ File ${targetPath} already exists and will not be overwritten.`);
+            return;
+          }
+          await fs.copyFile(file, targetPath);
+
+          core.info(`✅ Copied ${file} to ${targetPath}`);
+        } catch (err) {
+          core.error(`❌ Error copying ${file}. ${err.message}.`);
+          hasError = hasError || true;
+        }
+    }));
+
+    if(hasError) {
+      core.setFailed('Error copying files');
     }
   } catch (error) {
     core.setFailed(error.message);
@@ -30993,7 +31036,6 @@ async function run() {
 }
 
 run();
-
 module.exports = __webpack_exports__;
 /******/ })()
 ;

@@ -45,5 +45,7 @@ jobs:
 ```
 
 ## Changelog
-- v1 (latest)
+- v1.1 (latest)
+  - fixing cross-platform issues
+- v1
   - Initial implementaion of action fuctionality
