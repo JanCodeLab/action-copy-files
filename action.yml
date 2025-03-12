@@ -1,0 +1,29 @@
+name: 'Copy files'
+description: 'Copy content from source folder to target folder using patterns matching with ensuring path creation'
+author: 'JanCodeLab'
+
+inputs:
+  source-folder:
+    description: 'Source folder'
+    required: false
+    default: '*'
+  contents:
+    description: 'Patterns to match files'
+    required: true
+    default: '**'
+  target-folder:
+    description: 'Target folder'
+    required: true
+    default: '.'
+  clean-target-folder:
+    description: 'Clean target folder before copying'
+    required: false
+    default: 'false'
+  overwrite:
+    description: 'Overwrite files in target folder'
+    required: false
+    default: 'false'
+
+runs:
+  using: 'node16'
+  main: 'dist/index.js'
