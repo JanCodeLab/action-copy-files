@@ -12,6 +12,15 @@ async function fileExists(filePath) {
   }
 }
 
+async function isDirectory(filePath) {
+  try {
+    const stats = await fs.stat(filePath);
+    return stats.isDirectory();
+  } catch {
+    return false;
+  }
+}
+
 async function run() {
   try {
     let sourceFolder = core.getInput('source-folder');
@@ -33,7 +42,16 @@ async function run() {
     await fs.mkdir(targetFolder, { recursive: true });
     
     // Find files matching the pattern
-    let files = glob.sync(contents, { cwd: sourceFolder, absolute: true });
+    let globResults = glob.sync(contents, { cwd: sourceFolder, absolute: true });
+    
+    // Filter out directories (Windows issue)
+    let files = [];
+    for (const result of globResults) {
+      if (!(await isDirectory(result))) {
+        files.push(result);
+      }
+    }
+    core.info(`Found ${files.length} files to copy (filtered from ${globResults.length} total matches)`);
     
     let hasError = false;
     await Promise.all(files.map(async file => {
