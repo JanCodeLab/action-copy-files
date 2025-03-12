@@ -38,7 +38,7 @@ async function run() {
     let hasError = false;
     await Promise.all(files.map(async file => {
         const relativePath = path.relative(sourceFolder, file);
-        const targetPath = path.join(targetFolder, relativePath);
+        const targetPath = path.resolve(path.join(targetFolder, relativePath));
         
         try {
           // Ensure target subdirectory exists
