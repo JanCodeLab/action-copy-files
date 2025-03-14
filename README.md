@@ -1,4 +1,5 @@
 # Copy Files Action
+[![Release](https://github.com/JanCodeLab/action-copy-files/actions/workflows/release.yml/badge.svg)](https://github.com/JanCodeLab/action-copy-files/actions/workflows/release.yml)
 
 This GitHub Action copy files to target destination with folder structure creation and can be used across your organization.
 
